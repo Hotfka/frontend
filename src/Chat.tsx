@@ -1,6 +1,8 @@
 import * as React from "react";
 import { Box, TextField, Button, Typography, Grid, Paper } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const messages = [
   { id: 1, text: "Hi there!", sender: "bot" },
@@ -10,6 +12,7 @@ const messages = [
 
 const ChatUI = () => {
   const userName = "user";
+  const notify = () => toast("Kafka event created!!");
 
   const eventSource = new EventSource(
     `http://localhost:8081/SSE/subscribe/${userName}`
@@ -17,6 +20,11 @@ const ChatUI = () => {
 
   eventSource.addEventListener("sse", (event) => {
     console.log(event);
+
+    if (event.data === "event") {
+      notify();
+      console.log("notify!!!");
+    }
   });
 
   const [input, setInput] = React.useState("");
@@ -40,37 +48,40 @@ const ChatUI = () => {
   };
 
   return (
-    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-      <Box sx={{ flexGrow: 1, overflow: "auto", p: 2 }}>
-        {messages.map((message) => (
-          <Message key={message.id} message={message} />
-        ))}
-      </Box>
-      <Box sx={{ p: 2, backgroundColor: "background.default" }}>
-        <Grid container spacing={2}>
-          <Grid item xs={10}>
-            <TextField
-              fullWidth
-              placeholder="Type a message"
-              value={input}
-              onChange={handleInputChange}
-            />
+    <div>
+      <ToastContainer></ToastContainer>
+      <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+        <Box sx={{ flexGrow: 1, overflow: "auto", p: 2 }}>
+          {messages.map((message) => (
+            <Message key={message.id} message={message} />
+          ))}
+        </Box>
+        <Box sx={{ p: 2, backgroundColor: "background.default" }}>
+          <Grid container spacing={2}>
+            <Grid item xs={10}>
+              <TextField
+                fullWidth
+                placeholder="Type a message"
+                value={input}
+                onChange={handleInputChange}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <Button
+                fullWidth
+                size="large"
+                color="primary"
+                variant="contained"
+                endIcon={<SendIcon />}
+                onClick={handleSend}
+              >
+                Send
+              </Button>
+            </Grid>
           </Grid>
-          <Grid item xs={2}>
-            <Button
-              fullWidth
-              size="large"
-              color="primary"
-              variant="contained"
-              endIcon={<SendIcon />}
-              onClick={handleSend}
-            >
-              Send
-            </Button>
-          </Grid>
-        </Grid>
+        </Box>
       </Box>
-    </Box>
+    </div>
   );
 };
 
