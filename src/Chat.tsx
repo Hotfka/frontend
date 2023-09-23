@@ -9,6 +9,16 @@ const messages = [
 ];
 
 const ChatUI = () => {
+  const userName = "user";
+
+  const eventSource = new EventSource(
+    `http://localhost:8081/SSE/subscribe/${userName}`
+  );
+
+  eventSource.addEventListener("sse", (event) => {
+    console.log(event);
+  });
+
   const [input, setInput] = React.useState("");
 
   const handleSend = () => {
@@ -16,8 +26,13 @@ const ChatUI = () => {
       console.log(input);
       setInput("");
     }
+    const maxId = messages.reduce(
+      (max, message) => (message.id > max ? message.id : max),
+      0
+    );
 
-    messages.push({ id: 4, text: input, sender: "user" });
+    messages.push({ id: maxId + 1, text: input, sender: "user" });
+    console.log(messages);
   };
 
   const handleInputChange = (event: any) => {
