@@ -66,15 +66,22 @@ const ChatUI = () => {
 
   const handleSend = () => {
     if (input.trim() !== "") {
+      axios
+        .post("http://localhost:8080/api/v1/sendMessage", {
+          userName: "user",
+          text: input,
+          sender: "user",
+        })
+        .then(function (response) {
+          console.log("sendMessage success");
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
       console.log(input);
       setInput("");
     }
-    const maxId = messages.reduce(
-      (max, message) => (message.id > max ? message.id : max),
-      0
-    );
 
-    messages.push({ id: maxId + 1, text: input, sender: "user" });
     console.log(messages);
   };
 
