@@ -3,14 +3,48 @@ import { Box, TextField, Button, Typography, Grid, Paper } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ConstructionRounded } from "@mui/icons-material";
+import { useEffect, useState } from "react";
+import { resourceLimits } from "worker_threads";
+import axios from "axios";
+import { type } from "@testing-library/user-event/dist/type";
 
-const messages = [
+type messageType = {
+  id: number;
+  text: string;
+  sender: string;
+};
+
+const messagestemp = [
   { id: 1, text: "Hi there!", sender: "bot" },
   { id: 2, text: "Hello!", sender: "user" },
   { id: 3, text: "How can I assist you today?", sender: "bot" },
 ];
 
 const ChatUI = () => {
+  useEffect(() => {
+    fetchMessages();
+  }, []); // 컴포넌트가 마운트되면 fetchUsers 함수를 호출합니다. 이를 통해 최초 한 번만 데이터를 가져옵니다.
+
+  const [messages, setMessages] = useState<messageType[]>([]);
+
+  const fetchMessages = async () => {
+    axios
+      .get("http://localhost:8080/api/v1/getMessages")
+      .then(function (response) {
+        const transformedData = response.data.map((message: any) => ({
+          id: message.messageId,
+          text: message.text,
+          sender: message.sender,
+        }));
+
+        setMessages(transformedData);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+
   const userName = "user";
   const notify = () => toast("Kafka event created!!");
 
@@ -24,6 +58,7 @@ const ChatUI = () => {
     if (event.data === "event") {
       notify();
       console.log("notify!!!");
+      fetchMessages();
     }
   });
 
