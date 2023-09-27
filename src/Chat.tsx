@@ -4,7 +4,7 @@ import SendIcon from "@mui/icons-material/Send";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ConstructionRounded } from "@mui/icons-material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { resourceLimits } from "worker_threads";
 import axios from "axios";
 import { type } from "@testing-library/user-event/dist/type";
@@ -33,11 +33,18 @@ const EmojiIcon = ({ type }: any) => {
 };
 
 const ChatUI = () => {
+  const [messages, setMessages] = useState<messageType[]>([]);
+  const scrollRef = useRef<null | HTMLDivElement>(null);
+
   useEffect(() => {
     fetchMessages();
   }, []); // 컴포넌트가 마운트되면 fetchUsers 함수를 호출합니다. 이를 통해 최초 한 번만 데이터를 가져옵니다.
 
-  const [messages, setMessages] = useState<messageType[]>([]);
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const fetchMessages = async () => {
     axios
@@ -117,7 +124,7 @@ const ChatUI = () => {
     <div>
       <ToastContainer></ToastContainer>
       <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-        <Box sx={{ flexGrow: 1, overflow: "auto", p: 2 }}>
+        <Box sx={{ flexGrow: 1, overflow: "auto", p: 2 }} ref={scrollRef}>
           {messages.map((message) => (
             <Message key={message.id} message={message} />
           ))}
