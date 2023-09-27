@@ -63,7 +63,8 @@ const ChatUI = () => {
   };
 
   const userName = "user";
-  const notify = () => toast("Kafka event created!!");
+  const messageNotify = () => toast("Kafka messageEvent created!!");
+  const reactionNotify = () => toast("Kafka reactionEvent created!!");
 
   const eventSource = new EventSource(
     `http://localhost:8081/SSE/subscribe/${userName}`
@@ -72,9 +73,15 @@ const ChatUI = () => {
   eventSource.addEventListener("sse", (event) => {
     console.log(event);
 
-    if (event.data === "event") {
-      notify();
-      console.log("notify!!!");
+    if (event.data === "messageEvent") {
+      messageNotify();
+      console.log("message notify!!!");
+      fetchMessages();
+    }
+
+    if (event.data === "reactionEvent") {
+      reactionNotify();
+      console.log("reaction notify!!!");
       fetchMessages();
     }
   });
