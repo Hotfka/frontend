@@ -8,18 +8,29 @@ import { useEffect, useState } from "react";
 import { resourceLimits } from "worker_threads";
 import axios from "axios";
 import { type } from "@testing-library/user-event/dist/type";
+import { FaHeart } from "react-icons/fa";
+import { FaRegSadCry } from "react-icons/fa";
+import { FaRegLaughBeam } from "react-icons/fa";
 
 type messageType = {
   id: number;
   text: string;
   sender: string;
+  reactions: { reactionType: string; count: number }[];
 };
 
-const messagestemp = [
-  { id: 1, text: "Hi there!", sender: "bot" },
-  { id: 2, text: "Hello!", sender: "user" },
-  { id: 3, text: "How can I assist you today?", sender: "bot" },
-];
+const EmojiIcon = ({ type }: any) => {
+  switch (type) {
+    case "HEART":
+      return <FaHeart />; // 여기에 해당하는 아이콘 컴포넌트를 사용
+    case "SAD":
+      return <FaRegSadCry />; // 여기에 해당하는 아이콘 컴포넌트를 사용
+    case "LAUGH":
+      return <FaRegLaughBeam />; // 여기에 해당하는 아이콘 컴포넌트를 사용
+    default:
+      return null;
+  }
+};
 
 const ChatUI = () => {
   useEffect(() => {
@@ -31,16 +42,22 @@ const ChatUI = () => {
   const fetchMessages = async () => {
     axios
       .get("http://localhost:8080/api/v1/getMessages")
-      .then(function (response) {
+      .then(function (response: any) {
         const transformedData = response.data.map((message: any) => ({
           id: message.messageId,
           text: message.text,
           sender: message.sender,
+          reactions: ["HEART", "SAD", "LAUGH"].map((type) => ({
+            reactionType: type,
+            count: message.reactions.filter(
+              (reaction: any) => reaction.reactionType === type
+            ).length,
+          })),
         }));
 
         setMessages(transformedData);
       })
-      .catch(function (error) {
+      .catch(function (error: any) {
         console.log(error);
       });
   };
@@ -72,10 +89,10 @@ const ChatUI = () => {
           text: input,
           sender: "user",
         })
-        .then(function (response) {
+        .then(function (response: any) {
           console.log("sendMessage success");
         })
-        .catch(function (error) {
+        .catch(function (error: any) {
           console.log(error);
         });
       console.log(input);
@@ -146,6 +163,17 @@ const Message = ({ message }: any) => {
         }}
       >
         <Typography variant="body1">{message.text}</Typography>
+        <Box sx={{ display: "flex", mt: 1 }}>
+          {message.reactions.map((reaction: any) => (
+            <Button
+              key={reaction.reactionType}
+              startIcon={<EmojiIcon type={reaction.reactionType} />}
+              sx={{ mx: 1 }}
+            >
+              {reaction.count}
+            </Button>
+          ))}
+        </Box>
       </Paper>
     </Box>
   );
